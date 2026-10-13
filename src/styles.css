@@ -1,0 +1,610 @@
+/* Drop Frame Studio: hero site
+   Palette is pulled from the room itself: projector light, velvet seats, the logo's orange,
+   and the grey of an Academy film leader for the loader. */
+:root {
+  --projector: #f4ead8; /* warm white of the beam: all type over the scene */
+  --projector-dim: rgba(244, 234, 216, 0.72);
+  --brand: #e0531f; /* the orange block in the logo */
+  --velvet: #6b1915; /* seat fabric */
+  --leader: #8e8b83; /* film-leader grey */
+  --leader-ink: #23201c;
+  --umber: #2a1a12; /* deep shadow in the room, used for the reel and scrims */
+
+  --display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --text: 'Hanken Grotesk', system-ui, sans-serif;
+
+  --gutter: clamp(20px, 4vw, 56px);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--umber);
+  color: var(--projector);
+  font-family: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--brand);
+  color: var(--projector);
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------ 3D stage */
+.stage {
+  position: fixed !important;
+  inset: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0;
+}
+
+/* Soft shade at the bottom-left so type stays readable over a bright frame */
+.scroller::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 80% at 0% 100%, rgba(30, 16, 10, 0.62) 0%, rgba(30, 16, 10, 0) 60%);
+  z-index: -1;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(24, 14, 9, 0.72);
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------ masthead */
+.masthead {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(var(--gutter) * 0.6) var(--gutter);
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 1s var(--ease-out) 1.4s, transform 1.2s var(--ease-out) 1.4s;
+}
+html[data-ready] .masthead {
+  opacity: 1;
+  transform: none;
+}
+
+/* The logo, rebuilt in type: DROP [FRAME] STUDIO */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.wordmark__frame {
+  background: var(--brand);
+  padding: 0.12em 0.22em 0.08em;
+}
+
+.nav {
+  display: flex;
+  gap: clamp(16px, 2.4vw, 36px);
+}
+.nav a {
+  position: relative;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  padding: 6px 0;
+}
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s var(--ease-out);
+}
+.nav a:hover::after,
+.nav a:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ------------------------------------------------------------ chapters */
+.scroller {
+  position: relative;
+  z-index: 2;
+  pointer-events: none; /* let drags reach the 3D canvas */
+}
+.scroller a,
+.scroller button {
+  pointer-events: auto;
+}
+
+/* Each chapter is taller than the screen; its copy is a sticky full-screen panel, so the
+   words hold still while the camera travels underneath, then scroll away together. */
+.chapter {
+  min-height: 160vh;
+}
+.chapter--hero {
+  min-height: 130vh;
+}
+.chapter--last {
+  min-height: 100vh;
+}
+.chapter__panel {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--gutter) 13vh;
+}
+.chapter__copy {
+  max-width: min(100%, 980px);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3.6rem, 10.5vw, 10.5rem);
+  line-height: 0.84;
+  letter-spacing: -0.005em;
+}
+.title__line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.04em; /* room for descenders inside the mask */
+}
+.title__char {
+  display: inline-block;
+  transform: translateY(105%);
+  transition: transform 1.15s var(--ease-out);
+  transition-delay: calc(var(--i) * 18ms);
+}
+.is-in .title__char {
+  transform: none;
+}
+/* the hero waits for the loader */
+.chapter--hero .title__char {
+  transition-delay: calc(var(--i) * 26ms + 1.1s);
+}
+html:not([data-ready]) .chapter--hero .title__char {
+  transform: translateY(105%);
+}
+
+.chapter__body {
+  margin: 1.6rem 0 0;
+  max-width: 34ch;
+  font-size: clamp(1rem, 0.4vw + 0.9rem, 1.2rem);
+  line-height: 1.5;
+  color: var(--projector-dim);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 1s var(--ease-out) 0.35s, transform 1.2s var(--ease-out) 0.35s;
+}
+.is-in .chapter__body {
+  opacity: 1;
+  transform: none;
+}
+.chapter--hero .chapter__body {
+  transition-delay: 1.9s;
+}
+html:not([data-ready]) .chapter--hero .chapter__body {
+  opacity: 0;
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 1rem 1.6rem 0.95rem;
+  background: var(--brand);
+  color: var(--projector);
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  border-radius: 999px;
+  transition: background 0.4s var(--ease-out), transform 0.6s var(--ease-out);
+}
+.cta:hover {
+  background: var(--velvet);
+  transform: translateY(-2px);
+}
+
+/* ------------------------------------------------------------ work reel */
+.reel {
+  height: 360vh;
+  position: relative;
+}
+.reel__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4vh;
+}
+.reel__title {
+  margin: 0;
+  padding: 0 var(--gutter);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 6vw, 6rem);
+  line-height: 0.9;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s var(--ease-out), transform 1.2s var(--ease-out);
+}
+.reel.is-in .reel__title {
+  opacity: 1;
+  transform: none;
+}
+
+/* the strip: dark film base with a row of sprocket holes above and below */
+.reel__strip {
+  --hole: rgba(244, 234, 216, 0.16);
+  position: relative;
+  padding: 34px 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 14px, var(--hole) 14px 26px, transparent 26px 40px) top 10px left 0 / 100% 12px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 14px, var(--hole) 14px 26px, transparent 26px 40px) bottom 10px left 0 / 100% 12px no-repeat,
+    rgba(18, 11, 7, 0.86);
+}
+.reel__track {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--gutter) 0 calc(var(--gutter) + 12vw);
+  display: flex;
+  gap: 2.4vw;
+  width: max-content;
+  will-change: transform;
+}
+.reel__item {
+  width: clamp(260px, 34vw, 560px);
+}
+.reel__frame {
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--umber);
+}
+.reel__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform;
+  transition: filter 0.6s var(--ease-out);
+}
+.reel__frame:hover img {
+  filter: brightness(1.12) saturate(1.1);
+}
+.reel__caption {
+  margin: 0.9rem 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.95rem;
+}
+.reel__name {
+  font-weight: 600;
+}
+.reel__meta {
+  color: var(--projector-dim);
+}
+
+/* ------------------------------------------------------------ HUD */
+.hud {
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(var(--gutter) * 0.6);
+  left: var(--gutter);
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 1s var(--ease-out) 2.2s;
+}
+html[data-ready] .hud {
+  opacity: 1;
+}
+.hud__hint {
+  color: var(--projector-dim);
+}
+.hud__tc {
+  position: relative;
+  padding-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.hud__tc::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand) calc(var(--p, 0) * 100%), rgba(244, 234, 216, 0.25) 0);
+}
+
+/* ------------------------------------------------------------ cursor */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+.cursor {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+.cursor__dot,
+.cursor__ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.cursor__dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--projector);
+  mix-blend-mode: difference;
+}
+.cursor__ring {
+  width: 0;
+  height: 0;
+}
+.cursor__ring::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  left: -20px;
+  top: -20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--projector);
+  transition:
+    width 0.5s var(--ease-out),
+    height 0.5s var(--ease-out),
+    left 0.5s var(--ease-out),
+    top 0.5s var(--ease-out),
+    background 0.4s var(--ease-out),
+    border-color 0.4s var(--ease-out),
+    opacity 0.3s;
+}
+.cursor__ring span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.cursor__ring[data-state='label']::before {
+  width: 86px;
+  height: 86px;
+  left: -43px;
+  top: -43px;
+  background: var(--brand);
+  border-color: var(--brand);
+}
+.cursor__ring[data-state='label'] span {
+  opacity: 1;
+}
+.cursor__ring[data-state='hint']::before {
+  width: 66px;
+  height: 66px;
+  left: -33px;
+  top: -33px;
+  border-color: rgba(244, 234, 216, 0.7);
+}
+.cursor__ring[data-state='hint'] span {
+  opacity: 1;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+.cursor__ring[data-state='link']::before {
+  width: 64px;
+  height: 64px;
+  left: -32px;
+  top: -32px;
+  background: rgba(244, 234, 216, 0.12);
+}
+html[data-dragging] .cursor__ring::before {
+  width: 58px;
+  height: 58px;
+  left: -29px;
+  top: -29px;
+}
+.cursor__ring[data-hidden]::before,
+.cursor__ring[data-hidden] span {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------ film leader loader */
+@property --sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.leader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--leader);
+  color: var(--leader-ink);
+  display: grid;
+  place-items: center;
+  clip-path: inset(0 0 0 0);
+}
+.leader__frame {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.leader__cross {
+  position: absolute;
+  background: var(--leader-ink);
+  opacity: 0.55;
+}
+.leader__cross--h {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+}
+.leader__cross--v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+}
+.leader__dial {
+  position: relative;
+  width: min(62vmin, 520px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.leader__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--leader-ink);
+}
+.leader__ring--outer {
+  inset: 0;
+}
+.leader__ring--inner {
+  inset: 9%;
+}
+.leader__sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(rgba(35, 32, 28, 0.3) var(--sweep), transparent 0);
+  animation: sweep 360ms linear forwards;
+}
+@keyframes sweep {
+  from {
+    --sweep: 0deg;
+  }
+  to {
+    --sweep: 360deg;
+  }
+}
+.leader__num {
+  position: relative;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: min(40vmin, 340px);
+  line-height: 1;
+  margin-top: 0.04em;
+}
+.leader__status {
+  position: absolute;
+  bottom: calc(var(--gutter) * 0.8);
+  margin: 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.leader--flash {
+  background: #fffaf0;
+}
+.leader--flash > * {
+  visibility: hidden;
+}
+.leader--out {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1s var(--ease-in-out);
+}
+.leader--out > * {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------ small screens */
+@media (max-width: 640px) {
+  .wordmark {
+    font-size: 1.05rem;
+  }
+  .nav a:nth-child(2) {
+    display: none;
+  }
+  .chapter {
+    min-height: 140vh;
+  }
+  .reel__item {
+    width: 72vw;
+  }
+  .reel__track {
+    padding-left: var(--gutter);
+  }
+}
+
+/* ------------------------------------------------------------ reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .title__char,
+  .chapter__body,
+  .masthead,
+  .hud,
+  .reel__title {
+    transition-duration: 0.01s !important;
+    transition-delay: 0s !important;
+  }
+  .leader__sweep {
+    animation: none;
+  }
+}
