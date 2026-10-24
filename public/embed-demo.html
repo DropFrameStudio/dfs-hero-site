@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DFS hero room: embed test</title>
+    <link rel="stylesheet" href="./dfs-hero.css" />
+    <style>
+      body { margin: 0; background: #100f0d; color: #f1eee6; font: 12px/1.3 ui-monospace, monospace; letter-spacing: 1.2px; }
+      .wrap { display: flex; gap: 32px; padding: 48px; align-items: flex-end; }
+      .slot { width: 520px; height: 600px; background: #333 center / cover; }
+      .picker { display: grid; gap: 12px; }
+      .picker div { padding: 10px 0; border-bottom: 1px solid #f1eee6; opacity: .6; }
+      .picker .is-current { opacity: 1; color: #ff642e; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="slot" data-dfs-room data-dfs-start="hero"></div>
+      <div class="picker">
+        <div data-dfs-shot="hero">01 BETWEEN FRAMES</div>
+        <div data-dfs-shot="window">02 PORTRAIT STUDY</div>
+        <div data-dfs-shot="poster">03 STUDIO IDENT</div>
+      </div>
+    </div>
+    <script type="module" src="./dfs-hero.js"></script>
+  </body>
+</html>

@@ -7,7 +7,8 @@
     "start": "npm install && vite --open",
     "dev": "vite --open",
     "build": "vite build",
-    "preview": "vite preview --open"
+    "preview": "vite preview --open",
+    "build:embed": "vite build --config vite.embed.config.js"
   },
   "dependencies": {
     "@react-three/drei": "9.117.3",

@@ -17,6 +17,7 @@ export const motion = {
   ready: false, // loader finished
   pointer: { x: 0, y: 0 }, // -1..1, centred
   drag: { active: false, yaw: 0, pitch: 0 }, // radians, added on top of the shot
+  shot: null, // embed mode: a SHOTS key chosen by the page's picker; null = follow the scroll
 }
 
 let lenis = null

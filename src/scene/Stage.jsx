@@ -6,8 +6,9 @@ import { EffectComposer, DepthOfField, Bloom, Vignette, Noise, ChromaticAberrati
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
 import { CHAPTERS, SHOTS } from '../content.js'
 import { motion, isTouch, reducedMotion, clamp, lerp, damp, smoothstep, easeInOutCubic } from '../lib/motion.js'
+import { asset } from '../lib/base.js'
 
-const MODEL = '/models/dfs_hero_web.glb'
+const MODEL = asset('models/dfs_hero_web.glb')
 const CAM_POS = new THREE.Vector3(-1.726, 0.418, -0.059) // the one point the panorama is correct from
 const SHIFT_Y = -0.068 // Blender lens shift, re-applied with setViewOffset
 const SENSOR = 36
@@ -18,10 +19,10 @@ const CA_OFFSET = new THREE.Vector2(0, 0) // RGB split amount, driven by scroll 
 // ------------------------------------------------------------------ model
 function Room() {
   const gl = useThree((s) => s.gl)
-  const { scene } = useGLTF(MODEL, '/draco/', true, (loader) => {
-    loader.setKTX2Loader(new KTX2Loader().setTranscoderPath('/basis/').detectSupport(gl))
+  const { scene } = useGLTF(MODEL, asset('draco/'), true, (loader) => {
+    loader.setKTX2Loader(new KTX2Loader().setTranscoderPath(asset('basis/')).detectSupport(gl))
   })
-  const wetMask = useTexture('/textures/floor_wetness.webp')
+  const wetMask = useTexture(asset('textures/floor_wetness.webp'))
   wetMask.colorSpace = THREE.NoColorSpace
   wetMask.flipY = false
 
@@ -178,7 +179,11 @@ function CameraDirector({ dofRef }) {
 
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 1 / 20)
-    const { from, to, t, chapter } = shotAt(anchors, motion.scrollY)
+    // Embed mode: a picker sets motion.shot directly; the damped follow below does the glide
+    const fixed = motion.shot && SHOTS[motion.shot]
+    const { from, to, t, chapter } = fixed
+      ? { from: fixed, to: fixed, t: 0, chapter: 0 }
+      : shotAt(anchors, motion.scrollY)
     motion.chapter = chapter
 
     // 1. where the scroll says we should be
@@ -240,11 +245,13 @@ function CameraDirector({ dofRef }) {
 }
 
 // ------------------------------------------------------------------ canvas
-export default function Stage() {
+export default function Stage({ className = 'stage', frameloop = 'always', eventSource }) {
   const dofRef = useRef()
   return (
     <Canvas
-      className="stage"
+      className={className}
+      frameloop={frameloop}
+      eventSource={eventSource}
       dpr={[1, isTouch ? 1.5 : 1.75]}
       gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
       camera={{ position: CAM_POS.toArray(), fov: 50, near: 0.05, far: 200 }}

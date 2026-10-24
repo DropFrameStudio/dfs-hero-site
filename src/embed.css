@@ -1,0 +1,143 @@
+/* Embed build: everything is scoped to .dfs-room so it can't leak into the host page.
+   Fonts come from the host page's Webflow variables, with the repo's fonts as fallback. */
+.dfs-room {
+  --dfs-leader: #8e8b83;
+  --dfs-leader-ink: #23201c;
+  --dfs-display: var(--_dfs--webflow---font--display, 'Archivo Black', 'Arial Black', sans-serif);
+  --dfs-mono: var(--_dfs--webflow---font--mono, 'IBM Plex Mono', ui-monospace, monospace);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  container-type: size;
+}
+.dfs-room *,
+.dfs-room *::before,
+.dfs-room *::after {
+  box-sizing: border-box;
+}
+.dfs-room .dfs-stage {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+.dfs-room .dfs-stage canvas {
+  display: block;
+}
+html[data-dragging] .dfs-room .dfs-stage {
+  cursor: grabbing;
+}
+.dfs-room .dfs-stage {
+  cursor: grab;
+}
+
+/* ------------------------------------------------------------ film-leader loader */
+@property --sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.dfs-room .leader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--dfs-leader);
+  color: var(--dfs-leader-ink);
+  display: grid;
+  place-items: center;
+  clip-path: inset(0 0 0 0);
+}
+.dfs-room .leader__frame {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.dfs-room .leader__cross {
+  position: absolute;
+  background: var(--dfs-leader-ink);
+  opacity: 0.55;
+}
+.dfs-room .leader__cross--h {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+}
+.dfs-room .leader__cross--v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+}
+.dfs-room .leader__dial {
+  position: relative;
+  width: min(70cqmin, 520px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.dfs-room .leader__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--dfs-leader-ink);
+}
+.dfs-room .leader__ring--outer {
+  inset: 0;
+}
+.dfs-room .leader__ring--inner {
+  inset: 9%;
+}
+.dfs-room .leader__sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(rgba(35, 32, 28, 0.3) var(--sweep), transparent 0);
+  animation: dfs-sweep 360ms linear forwards;
+}
+@keyframes dfs-sweep {
+  from {
+    --sweep: 0deg;
+  }
+  to {
+    --sweep: 360deg;
+  }
+}
+.dfs-room .leader__num {
+  position: relative;
+  font-family: var(--dfs-display);
+  font-weight: 400;
+  font-size: min(44cqmin, 340px);
+  line-height: 1;
+  margin-top: 0.04em;
+}
+.dfs-room .leader__status {
+  position: absolute;
+  bottom: 24px;
+  margin: 0;
+  font-family: var(--dfs-mono);
+  font-size: 11px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.dfs-room .leader--flash {
+  background: #fffaf0;
+}
+.dfs-room .leader--flash > * {
+  visibility: hidden;
+}
+.dfs-room .leader--out {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.dfs-room .leader--out > * {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dfs-room .leader__sweep {
+    animation: none;
+  }
+}
